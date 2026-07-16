@@ -1,0 +1,146 @@
+openapi: 3.0.3
+info:
+  title: Altia backend test
+  description: |
+    API to query applicable prices and final tariffs (PVP) for a product
+    of a specific brand within a given application date. Resolves overlapping
+    schedules by applying the highest numeric priority rule.
+  version: 1.0.0
+servers:
+  - url: http://localhost:8080/api/v1
+    description: Local Development Server
+
+paths:
+  /prices:
+    get:
+      summary: Get applicable price tariff
+      description: Returns the final applicable price and tariff based on application date, product identifier, and brand identifier.
+      operationId: getApplicablePrice
+      parameters:
+        - name: applicationDate
+          in: query
+          description: Target date and time for the tariff application in ISO-8601 format (yyyy-MM-dd'T'HH:mm:ss)
+          required: true
+          schema:
+            type: string
+            format: date-time
+          example: "2020-06-14T16:00:00"
+        - name: productId
+          in: query
+          description: Numerical identifier of the target product.
+          required: true
+          schema:
+            type: integer
+            format: int64
+          example: 35455
+        - name: brandId
+          in: query
+          description: Numerical identifier of the commercial brand (ZARA = 1).
+          required: true
+          schema:
+            type: integer
+            format: int64
+          example: 1
+      responses:
+        '200':
+          description: Applicable price tariff successfully retrieved.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PriceResponse'
+        '400':
+          description: Bad request due to missing or incorrectly formatted parameters.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: No active price tariff found for the specified criteria.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+components:
+  schemas:
+    PriceResponse:
+      type: object
+      required:
+        - productId
+        - brandId
+        - priceList
+        - startDate
+        - endDate
+        - price
+        - currency
+      properties:
+        productId:
+          type: integer
+          format: int64
+          description: Unique identifier of the product.
+          example: 35455
+        brandId:
+          type: integer
+          format: int64
+          description: Unique identifier of the brand.
+          example: 1
+        priceList:
+          type: integer
+          description: Identifier of the applicable price list tariff.
+          example: 2
+        startDate:
+          type: string
+          format: date-time
+          description: Tariff validity start date and time.
+          example: "2020-06-14T15:00:00"
+        endDate:
+          type: string
+          format: date-time
+          description: Tariff validity end date and time.
+          example: "2020-06-14T18:30:00"
+        price:
+          type: number
+          format: double
+          description: Final sales price (PVP).
+          example: 25.45
+        currency:
+          type: string
+          description: Three-letter ISO currency code.
+          example: "EUR"
+
+    ErrorResponse:
+      type: object
+      required:
+        - timestamp
+        - status
+        - error
+        - message
+        - path
+      properties:
+        timestamp:
+          type: string
+          format: date-time
+          description: The timestamp when the error occurred.
+          example: "2026-07-16T11:00:00Z"
+        status:
+          type: integer
+          description: HTTP status code representing the error.
+          example: 404
+        error:
+          type: string
+          description: Short description of the HTTP error.
+          example: "Not Found"
+        message:
+          type: string
+          description: Detailed explanation of what caused the error.
+          example: "No applicable tariff was found for the provided parameters."
+        path:
+          type: string
+          description: Requested endpoint path that triggered the error.
+          example: "/api/v1/prices"
