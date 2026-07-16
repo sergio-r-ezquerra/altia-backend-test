@@ -10,6 +10,20 @@ import java.util.List;
 
 public interface PriceRepository extends JpaRepository<PriceEntity, Long> {
 
+    /**
+     * Retrieves all prices matching the given product and brand that are active
+     * within the specified application date range, ordered by priority
+     * descending.
+     *
+     * @param productId
+     *            Unique identifier of the product.
+     * @param brandId
+     *            Unique identifier of the brand.
+     * @param applicationDate
+     *            Target validation date.
+     * @return List of matching Price records to be processed by the service
+     *         priority layer, ordered by priority descending.
+     */
     @Query("SELECT p FROM PriceEntity p WHERE p.productId = :productId "
             + "AND p.brandId = :brandId "
             + "AND :applicationDate BETWEEN p.startDate AND p.endDate "
