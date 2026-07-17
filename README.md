@@ -104,3 +104,54 @@ To trigger the test execution safely via the command line interface, run:
 ```bash
 ./mvnw test
 ```
+
+---
+
+## 🔬 Unit Tests — Business Layer (`GetApplicablePriceService`)
+
+Unit tests for the business layer are isolated from the database and web layer using **Mockito** to mock the `PriceRepositoryPort`. They verify that the service enforces its own business rules correctly, regardless of infrastructure.
+
+To run only the unit test suite:
+```bash
+./mvnw test -Dtest=GetApplicablePriceServiceTest
+```
+
+### Test coverage breakdown
+
+#### ✅ Happy Path
+
+| Test | Description |
+|:---|:---|
+| `testGetApplicablePriceSuccess` | Returns the correct `Price` when the repository finds a match, and verifies the repository is called exactly once. |
+| `testGetApplicablePriceReturnsAllFields` | Asserts that all domain fields (`brandId`, `productId`, `priceList`, `priority`, `price`, `curr`, `startDate`, `endDate`) are propagated from the repository result without any silent data loss. |
+
+#### ❌ Price Not Found
+
+| Test | Description |
+|:---|:---|
+| `testGetApplicablePriceNotFound` | Verifies that `PriceNotFoundException` is thrown when the repository returns an empty `Optional`. |
+| `testGetApplicablePriceNotFoundExceptionMessage` | Asserts the exact exception message format: `"Price not found for product {id}, brand {id} at date {date}"`. |
+
+#### 🚫 Input Validation — Null Fields (message assertion)
+
+| Test | Description |
+|:---|:---|
+| `testGetApplicablePriceWithNullProductId` | Throws `IllegalArgumentException` with message `"Product ID and Brand ID must not be null"` when `productId` is `null`. |
+| `testGetApplicablePriceWithNullBrandId` | Same exception and message when `brandId` is `null`. |
+| `testGetApplicablePriceWithNullApplicationDate` | Throws `IllegalArgumentException` with message `"Application date must not be null"` when `applicationDate` is `null`. |
+
+#### 🚫 Input Validation — Repository not invoked on null inputs
+
+| Test | Description |
+|:---|:---|
+| `testGetApplicablePriceNullProductIdDoesNotInvokeRepository` | Guarantees the repository is **never called** when `productId` is `null` (fail-fast guard). |
+| `testGetApplicablePriceNullBrandIdDoesNotInvokeRepository` | Same guarantee for `brandId` null. |
+| `testGetApplicablePriceNullDateDoesNotInvokeRepository` | Same guarantee for `applicationDate` null. |
+
+#### 🔀 Request Variations (toBuilder copy)
+
+| Test | Description |
+|:---|:---|
+| `testGetApplicablePriceWithDifferentProduct` | A request with a different `productId` is correctly forwarded to the repository; `PriceNotFoundException` is thrown when no match is found. |
+| `testGetApplicablePriceWithDifferentBrand` | Same flow with a different `brandId`. |
+| `testGetApplicablePriceWithDifferentDate` | Same flow with a different `applicationDate`. |

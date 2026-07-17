@@ -16,6 +16,12 @@ public class GetApplicablePriceService implements GetApplicablePriceUseCase {
 
     @Override
     public Price getApplicablePrice(PriceRequest request) {
+        if (request.getProductId() == null || request.getBrandId() == null) {
+            throw new IllegalArgumentException("Product ID and Brand ID must not be null");
+        }
+        if (request.getApplicationDate() == null) {
+            throw new IllegalArgumentException("Application date must not be null");
+        }
         // @formatter:off
         return priceRepositoryPort.findApplicablePrice(
                 request.getProductId(),
