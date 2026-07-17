@@ -5,12 +5,12 @@ import static org.mockito.Mockito.*;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.Optional;
+import java.util.Collections;
+import java.util.List;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -18,6 +18,7 @@ import com.example.prices.application.port.out.PriceRepositoryPort;
 import com.example.prices.domain.exception.PriceNotFoundException;
 import com.example.prices.domain.model.Price;
 import com.example.prices.domain.model.PriceRequest;
+import com.example.prices.domain.service.PricePrioritySelector;
 
 @ExtendWith(MockitoExtension.class)
 public class GetApplicablePriceServiceTest {
@@ -25,7 +26,6 @@ public class GetApplicablePriceServiceTest {
     @Mock
     private PriceRepositoryPort priceRepositoryPort;
 
-    @InjectMocks
     private GetApplicablePriceService getApplicablePriceService;
 
     private PriceRequest testRequest;
@@ -33,6 +33,9 @@ public class GetApplicablePriceServiceTest {
 
     @BeforeEach
     void setUp() {
+        // Inicializamos manualmente inyectando el PricePrioritySelector real
+        getApplicablePriceService = new GetApplicablePriceService(priceRepositoryPort, new PricePrioritySelector());
+
         // @formatter:off
         testRequest = PriceRequest.builder()
                 .productId(Long.valueOf(35455))
@@ -62,10 +65,10 @@ public class GetApplicablePriceServiceTest {
     @Test
     void testGetApplicablePriceSuccess() {
         // Arrange
-        when(priceRepositoryPort.findApplicablePrice(testRequest.getProductId(),
+        when(priceRepositoryPort.findCandidatePrices(testRequest.getProductId(),
                 testRequest.getBrandId(),
                 testRequest.getApplicationDate())).thenReturn(
-                        Optional.of(testPrice));
+                        List.of(testPrice));
 
         // Act
         Price result =
@@ -74,7 +77,7 @@ public class GetApplicablePriceServiceTest {
         // Assert
         assertNotNull(result);
         assertEquals(testPrice, result);
-        verify(priceRepositoryPort, times(1)).findApplicablePrice(
+        verify(priceRepositoryPort, times(1)).findCandidatePrices(
                 testRequest.getProductId(), testRequest.getBrandId(),
                 testRequest.getApplicationDate());
     }
@@ -82,10 +85,10 @@ public class GetApplicablePriceServiceTest {
     @Test
     void testGetApplicablePriceReturnsAllFields() {
         // Arrange
-        when(priceRepositoryPort.findApplicablePrice(testRequest.getProductId(),
+        when(priceRepositoryPort.findCandidatePrices(testRequest.getProductId(),
                 testRequest.getBrandId(),
                 testRequest.getApplicationDate())).thenReturn(
-                        Optional.of(testPrice));
+                        List.of(testPrice));
 
         // Act
         Price result =
@@ -113,16 +116,16 @@ public class GetApplicablePriceServiceTest {
     @Test
     void testGetApplicablePriceNotFound() {
         // Arrange
-        when(priceRepositoryPort.findApplicablePrice(testRequest.getProductId(),
+        when(priceRepositoryPort.findCandidatePrices(testRequest.getProductId(),
                 testRequest.getBrandId(),
-                testRequest.getApplicationDate())).thenReturn(Optional.empty());
+                testRequest.getApplicationDate())).thenReturn(Collections.emptyList());
 
         // Act & Assert
         assertThrows(PriceNotFoundException.class, () -> {
             getApplicablePriceService.getApplicablePrice(testRequest);
         });
 
-        verify(priceRepositoryPort, times(1)).findApplicablePrice(
+        verify(priceRepositoryPort, times(1)).findCandidatePrices(
                 testRequest.getProductId(), testRequest.getBrandId(),
                 testRequest.getApplicationDate());
     }
@@ -130,9 +133,9 @@ public class GetApplicablePriceServiceTest {
     @Test
     void testGetApplicablePriceNotFoundExceptionMessage() {
         // Arrange
-        when(priceRepositoryPort.findApplicablePrice(testRequest.getProductId(),
+        when(priceRepositoryPort.findCandidatePrices(testRequest.getProductId(),
                 testRequest.getBrandId(),
-                testRequest.getApplicationDate())).thenReturn(Optional.empty());
+                testRequest.getApplicationDate())).thenReturn(Collections.emptyList());
 
         // Act & Assert
         PriceNotFoundException ex =
@@ -278,16 +281,16 @@ public class GetApplicablePriceServiceTest {
                 .build();
         // @formatter:on
 
-        when(priceRepositoryPort.findApplicablePrice(Long.valueOf(12345),
+        when(priceRepositoryPort.findCandidatePrices(Long.valueOf(12345),
                 Long.valueOf(1), testRequest.getApplicationDate())).thenReturn(
-                        Optional.empty());
+                        Collections.emptyList());
 
         // Act & Assert
         assertThrows(PriceNotFoundException.class, () -> {
             getApplicablePriceService.getApplicablePrice(request);
         });
 
-        verify(priceRepositoryPort, times(1)).findApplicablePrice(
+        verify(priceRepositoryPort, times(1)).findCandidatePrices(
                 Long.valueOf(12345), Long.valueOf(1),
                 testRequest.getApplicationDate());
     }
@@ -301,16 +304,16 @@ public class GetApplicablePriceServiceTest {
                 .build();
         // @formatter:on
 
-        when(priceRepositoryPort.findApplicablePrice(testRequest.getProductId(),
+        when(priceRepositoryPort.findCandidatePrices(testRequest.getProductId(),
                 Long.valueOf(2), testRequest.getApplicationDate())).thenReturn(
-                        Optional.empty());
+                        Collections.emptyList());
 
         // Act & Assert
         assertThrows(PriceNotFoundException.class, () -> {
             getApplicablePriceService.getApplicablePrice(request);
         });
 
-        verify(priceRepositoryPort, times(1)).findApplicablePrice(
+        verify(priceRepositoryPort, times(1)).findCandidatePrices(
                 testRequest.getProductId(), Long.valueOf(2),
                 testRequest.getApplicationDate());
     }
@@ -324,16 +327,16 @@ public class GetApplicablePriceServiceTest {
                 .build();
         // @formatter:on
 
-        when(priceRepositoryPort.findApplicablePrice(testRequest.getProductId(),
+        when(priceRepositoryPort.findCandidatePrices(testRequest.getProductId(),
                 testRequest.getBrandId(),
-                request.getApplicationDate())).thenReturn(Optional.empty());
+                request.getApplicationDate())).thenReturn(Collections.emptyList());
 
         // Act & Assert
         assertThrows(PriceNotFoundException.class, () -> {
             getApplicablePriceService.getApplicablePrice(request);
         });
 
-        verify(priceRepositoryPort, times(1)).findApplicablePrice(
+        verify(priceRepositoryPort, times(1)).findCandidatePrices(
                 testRequest.getProductId(), testRequest.getBrandId(),
                 request.getApplicationDate());
     }

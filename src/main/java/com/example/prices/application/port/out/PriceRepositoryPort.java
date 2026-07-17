@@ -1,28 +1,25 @@
 package com.example.prices.application.port.out;
 
-import com.example.prices.domain.model.Price;
-
 import java.time.LocalDateTime;
-import java.util.Optional;
+import java.util.List;
+
+import com.example.prices.domain.model.Price;
 
 public interface PriceRepositoryPort {
 
     /**
-     * Evaluates and retrieves the applicable price based on the priority rules
-     * for a given date, product, and brand.
+     * Retrieves all candidate prices for a given date, product, and brand. The
+     * business rule for selecting the highest priority price must be applied by
+     * the caller (domain layer).
      *
      * @param productId
      *            Unique identifier of the product.
-     * 
      * @param brandId
      *            Unique identifier of the brand.
-     * 
      * @param applicationDate
      *            Date and time to evaluate.
-     * 
-     * @return An Optional containing the applicable Price entity if found, or
-     *         empty otherwise.
+     * @return A list of candidate Price entities (may be empty).
      */
-    Optional<Price> findApplicablePrice(Long productId, Long brandId,
+    List<Price> findCandidatePrices(Long productId, Long brandId,
             LocalDateTime applicationDate);
 }

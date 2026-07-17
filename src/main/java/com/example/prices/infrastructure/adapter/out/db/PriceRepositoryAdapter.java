@@ -1,12 +1,13 @@
 package com.example.prices.infrastructure.adapter.out.db;
 
+import java.time.LocalDateTime;
+import java.util.List;
+
+import org.springframework.stereotype.Component;
+
 import com.example.prices.application.port.out.PriceRepositoryPort;
 import com.example.prices.domain.model.Price;
 import com.example.prices.infrastructure.adapter.out.db.entity.PriceEntity;
-import org.springframework.stereotype.Component;
-
-import java.time.LocalDateTime;
-import java.util.Optional;
 
 @Component
 public class PriceRepositoryAdapter implements PriceRepositoryPort {
@@ -18,10 +19,11 @@ public class PriceRepositoryAdapter implements PriceRepositoryPort {
     }
 
     @Override
-    public Optional<Price> findApplicablePrice(Long productId, Long brandId,
+    public List<Price> findCandidatePrices(Long productId, Long brandId,
             LocalDateTime applicationDate) {
         return priceRepository.findApplicablePrices(productId, brandId,
-                applicationDate).stream().findFirst().map(this::mapToDomain);
+                applicationDate).stream().map(this::mapToDomain).collect(
+                        java.util.stream.Collectors.toList());
     }
 
     private Price mapToDomain(PriceEntity entity) {

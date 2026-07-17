@@ -6,11 +6,20 @@ import com.example.prices.application.service.GetApplicablePriceService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import com.example.prices.domain.service.PricePrioritySelector;
+
 @Configuration
 public class BeanConfiguration {
 
     @Bean
-    public GetApplicablePriceUseCase getApplicablePriceUseCase(PriceRepositoryPort priceRepositoryPort) {
-        return new GetApplicablePriceService(priceRepositoryPort);
+    public PricePrioritySelector pricePrioritySelector() {
+        return new PricePrioritySelector();
+    }
+
+    @Bean
+    public GetApplicablePriceUseCase getApplicablePriceUseCase(
+            PriceRepositoryPort priceRepositoryPort,
+            PricePrioritySelector pricePrioritySelector) {
+        return new GetApplicablePriceService(priceRepositoryPort, pricePrioritySelector);
     }
 }

@@ -10,7 +10,7 @@ The application utilizes an in-memory **H2 database** pre-populated with realist
 
 To meet clean code guidelines and corporate decoupling principles, this project is designed using **Hexagonal Architecture (Ports & Adapters)**.
 
-* **Domain Layer:** Contains the pure business logic, exceptions, and core data models (`Price`, `PriceRequest`). It remains strictly agnostic and carries **zero dependencies** on external frameworks or Spring frameworks.
+* **Domain Layer:** Contains the pure business logic, exceptions, core data models (`Price`, `PriceRequest`), and domain services like `PricePrioritySelector` (which implements the "highest priority wins" rule). It remains strictly agnostic and carries **zero dependencies** on external frameworks or Spring frameworks.
 * **Application Layer (Ports):** Establishes the boundaries of the system through inbound ports (Use Cases) and outbound ports (Repository Interfaces).
 * **Infrastructure Layer (Adapters):** Connects the application to specific technologies. It features incoming web components (`@RestController`), automated global exception handling (`@ControllerAdvice`), and database-specific logic via Spring Data JPA interacting with H2.
 
@@ -107,12 +107,20 @@ To trigger the test execution safely via the command line interface, run:
 
 ---
 
-## 🔬 Unit Tests — Business Layer (`GetApplicablePriceService`)
+## 🔬 Unit Tests — Domain & Business Layer
 
-Unit tests for the business layer are isolated from the database and web layer using **Mockito** to mock the `PriceRepositoryPort`. They verify that the service enforces its own business rules correctly, regardless of infrastructure.
+Unit tests are divided into two main test suites:
 
-To run only the unit test suite:
+1. **Domain Layer (`PricePrioritySelectorTest`)**: Validates the priority selection business logic in isolation using pure JUnit tests without any mocks or frameworks.
+2. **Business / Application Layer (`GetApplicablePriceServiceTest`)**: Verifies the orchestrator logic, input validation, and proper integration with ports. It is isolated from the database and web layer using **Mockito** to mock the repository port.
+
+To run the unit test suites:
 ```bash
+# Run all tests
+./mvnw test
+
+# Run a specific unit test class
+./mvnw test -Dtest=PricePrioritySelectorTest
 ./mvnw test -Dtest=GetApplicablePriceServiceTest
 ```
 
