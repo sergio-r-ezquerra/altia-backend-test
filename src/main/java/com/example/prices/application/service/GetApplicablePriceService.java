@@ -9,6 +9,10 @@ import com.example.prices.domain.service.PricePrioritySelector;
 
 import java.util.List;
 
+/**
+ * Application service implementing the primary incoming port {@link GetApplicablePriceUseCase}.
+ * Coordinates the validation, retrieval of candidate prices, and execution of priority business rules.
+ */
 public class GetApplicablePriceService implements GetApplicablePriceUseCase {
 
     private final PriceRepositoryPort priceRepositoryPort;

@@ -9,6 +9,10 @@ import com.example.prices.application.port.out.PriceRepositoryPort;
 import com.example.prices.domain.model.Price;
 import com.example.prices.infrastructure.adapter.out.db.entity.PriceEntity;
 
+/**
+ * Outgoing persistence adapter implementing {@link PriceRepositoryPort}.
+ * Encapsulates JPA repository access and handles domain-to-entity mapping.
+ */
 @Component
 public class PriceRepositoryAdapter implements PriceRepositoryPort {
 

@@ -5,6 +5,9 @@ import java.util.List;
 
 import com.example.prices.domain.model.Price;
 
+/**
+ * Outcoming port defining the contract for database operations related to prices.
+ */
 public interface PriceRepositoryPort {
 
     /**

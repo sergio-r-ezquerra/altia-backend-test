@@ -21,6 +21,7 @@ public class PricePrioritySelector {
      * @return An Optional field with the applicable price, or empty if there
      *         are no candidates.
      */
+    // Suppress VS Code/Eclipse JDT null-analysis warning triggered by the method reference on unannotated Price type
     @SuppressWarnings("null")
     public Optional<Price> selectHighestPriority(List<Price> candidates) {
         if (candidates == null) {
