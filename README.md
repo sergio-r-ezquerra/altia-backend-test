@@ -28,6 +28,24 @@ To meet clean code guidelines and corporate decoupling principles, this project 
 
 ---
 
+## 🛠️ Tech Stack & Key Dependencies
+
+This project relies on the following core dependencies configured in the `pom.xml`:
+
+* **Spring Boot (Starter Parent):** Provides the foundational framework for building the microservice.
+  * `spring-boot-starter-webmvc`: Standard dependency for exposing REST endpoints and managing web request/response layers.
+  * `spring-boot-starter-data-jpa`: Handles JPA configurations, Hibernate ORM integration, and transactional database mapping.
+  * `spring-boot-starter-validation`: Used for structural validation of incoming request query parameters and data contracts.
+* **H2 Database:** In-memory relational database used for local execution, seeding sample scheduling records, and fast test verification.
+  * `spring-boot-h2console`: Auto-configures and exposes the web interface console for debugging data.
+* **Lombok:** Reduces verbose boilerplate code (e.g. getters, setters, constructors, builders) via annotation processors.
+* **Springdoc OpenAPI (v3.0.3):** Integrates Swagger UI to render interactive api testing pages.
+* **Testing Libraries:**
+  * `spring-boot-starter-test`: Standard dependency bundling JUnit 5, Mockito, AssertJ, and JSONPath utilities.
+  * `spring-boot-starter-webmvc-test`: Provides auto-configuration for Spring MVC slicing and MockMvc test utilities.
+
+---
+
 ## 🛠️ Local Setup & Execution
 
 ### Prerequisites
