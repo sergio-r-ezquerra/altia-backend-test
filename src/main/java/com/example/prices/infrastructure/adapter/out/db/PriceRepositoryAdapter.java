@@ -26,8 +26,7 @@ public class PriceRepositoryAdapter implements PriceRepositoryPort {
     public List<Price> findCandidatePrices(Long productId, Long brandId,
             LocalDateTime applicationDate) {
         return priceRepository.findApplicablePrices(productId, brandId,
-                applicationDate).stream().map(this::mapToDomain).collect(
-                        java.util.stream.Collectors.toList());
+                applicationDate).stream().map(this::mapToDomain).toList();
     }
 
     private Price mapToDomain(PriceEntity entity) {

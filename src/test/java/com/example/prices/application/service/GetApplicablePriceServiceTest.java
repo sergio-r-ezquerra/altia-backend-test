@@ -33,8 +33,8 @@ public class GetApplicablePriceServiceTest {
 
     @BeforeEach
     void setUp() {
-        // Inicializamos manualmente inyectando el PricePrioritySelector real
-        getApplicablePriceService = new GetApplicablePriceService(priceRepositoryPort, new PricePrioritySelector());
+        getApplicablePriceService = new GetApplicablePriceService(
+                priceRepositoryPort, new PricePrioritySelector());
 
         // @formatter:off
         testRequest = PriceRequest.builder()
@@ -118,7 +118,8 @@ public class GetApplicablePriceServiceTest {
         // Arrange
         when(priceRepositoryPort.findCandidatePrices(testRequest.getProductId(),
                 testRequest.getBrandId(),
-                testRequest.getApplicationDate())).thenReturn(Collections.emptyList());
+                testRequest.getApplicationDate())).thenReturn(
+                        Collections.emptyList());
 
         // Act & Assert
         assertThrows(PriceNotFoundException.class, () -> {
@@ -135,7 +136,8 @@ public class GetApplicablePriceServiceTest {
         // Arrange
         when(priceRepositoryPort.findCandidatePrices(testRequest.getProductId(),
                 testRequest.getBrandId(),
-                testRequest.getApplicationDate())).thenReturn(Collections.emptyList());
+                testRequest.getApplicationDate())).thenReturn(
+                        Collections.emptyList());
 
         // Act & Assert
         PriceNotFoundException ex =
@@ -329,7 +331,8 @@ public class GetApplicablePriceServiceTest {
 
         when(priceRepositoryPort.findCandidatePrices(testRequest.getProductId(),
                 testRequest.getBrandId(),
-                request.getApplicationDate())).thenReturn(Collections.emptyList());
+                request.getApplicationDate())).thenReturn(
+                        Collections.emptyList());
 
         // Act & Assert
         assertThrows(PriceNotFoundException.class, () -> {
