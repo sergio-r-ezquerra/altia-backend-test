@@ -22,7 +22,7 @@ To meet clean code guidelines and corporate decoupling principles, this project 
 * **Hexagonal Architecture** structure for strict isolation of business logic.
 * **Automated Data Seeding:** Database automatically seeds sample records upon application bootstrap.
 * **Robust Exception Handling:** Gracefully maps edge cases (e.g., entity not found or invalid payloads) into structured JSON error responses with explicit HTTP status codes.
-* **Comprehensive Test Coverage:** Features End-to-End (E2E) integration test suites validating the 5 explicit date-priority scenarios detailed in the requirement specs.
+* **Comprehensive Test Coverage:** Unit, MockMvc slice, and End-to-End REST-Assured integration tests validating the 5 explicit date-priority scenarios detailed in the requirement specs.
 * **OpenAPI 3 / Swagger Integration:** Interactive API documentation fully accessible natively through the UI.
 * **Docker Ready:** Multistage ultra-lightweight container builds using Alpine JRE mirrors.
 
@@ -30,7 +30,7 @@ To meet clean code guidelines and corporate decoupling principles, this project 
 
 ## 🛠️ Tech Stack & Key Dependencies
 
-This project relies on the following core dependencies configured in the `pom.xml`:
+This project relies on the following core dependencies configured in `pom.xml`:
 
 * **Spring Boot (Starter Parent):** Provides the foundational framework for building the microservice.
   * `spring-boot-starter-webmvc`: Standard dependency for exposing REST endpoints and managing web request/response layers.
@@ -39,10 +39,11 @@ This project relies on the following core dependencies configured in the `pom.xm
 * **H2 Database:** In-memory relational database used for local execution, seeding sample scheduling records, and fast test verification.
   * `spring-boot-h2console`: Auto-configures and exposes the web interface console for debugging data.
 * **Lombok:** Reduces verbose boilerplate code (e.g. getters, setters, constructors, builders) via annotation processors.
-* **Springdoc OpenAPI (v3.0.3):** Integrates Swagger UI to render interactive api testing pages.
+* **Springdoc OpenAPI (v3.0.3):** Integrates Swagger UI to render interactive API testing pages.
 * **Testing Libraries:**
   * `spring-boot-starter-test`: Standard dependency bundling JUnit 5, Mockito, AssertJ, and JSONPath utilities.
   * `spring-boot-starter-webmvc-test`: Provides auto-configuration for Spring MVC slicing and MockMvc test utilities.
+  * `rest-assured` (v5.5.1): Framework used for automated End-to-End REST API integration tests over HTTP without mocks.
 
 ---
 
@@ -99,85 +100,59 @@ Once the application is up and running via local Maven or Docker, you can inspec
 
 ### Sample Endpoint Query Request
 ```http
-GET /api/v1/prices?applicationDate=2020-06-14T16:00:00&productId=35455&brandId=1 HTTP/1.1
+GET /api/prices?applicationDate=2020-06-14T16:00:00&productId=35455&brandId=1 HTTP/1.1
 Host: localhost:8080
 Content-Type: application/json
 ```
 
 ---
 
-## 🧪 Automated Test Scenarios
+## 🧪 Automated Testing Suite
 
-The suite includes integration tests verifying the exact 5 target use cases defined in the specification protocol:
+The application includes a thorough testing suite categorized into Unit, Web Slice (MockMvc), and REST API Integration (REST-Assured) tests.
 
-| Test Case | Date / Time | Product ID | Brand ID | Expected Price List | Target Price | Reason / Behavior |
-|:---:|:---:|:---:|:---:|:---:|:---:|:---|
-| **Test 1** | June 14, 10:00 | 35455 | 1 (ZARA) | **1** | **35.50 EUR** | Default fallback base price. |
-| **Test 2** | June 14, 16:00 | 35455 | 1 (ZARA) | **2** | **25.45 EUR** | Overruled by higher priority logic (Priority 1 > 0). |
-| **Test 3** | June 14, 21:00 | 35455 | 1 (ZARA) | **1** | **35.50 EUR** | Specific timeframe expired; reverts back to base tariff. |
-| **Test 4** | June 15, 10:00 | 35455 | 1 (ZARA) | **3** | **30.50 EUR** | New overlapping timeframe active with Priority 1. |
-| **Test 5** | June 16, 21:00 | 35455 | 1 (ZARA) | **4** | **38.95 EUR** | Final promotion period active matching highest index priority. |
-
-To trigger the test execution safely via the command line interface, run:
+To run the complete test suite:
 ```bash
-./mvnw test
+./mvnw clean test
 ```
 
----
+### 1. REST API Integration Tests without Mocks (`PriceControllerRestIntegrationTest`)
 
-## 🔬 Unit Tests — Domain & Business Layer
+These tests run against a real running Spring Boot application context listening on a random HTTP port (`SpringBootTest.WebEnvironment.RANDOM_PORT`) connected to the in-memory H2 database, executing actual HTTP requests using **REST-Assured** without mocks.
 
-Unit tests are divided into two main test suites:
+#### Tested Requirements & Use Cases:
 
-1. **Domain Layer (`PricePrioritySelectorTest`)**: Validates the priority selection business logic in isolation using pure JUnit tests without any mocks or frameworks.
-2. **Business / Application Layer (`GetApplicablePriceServiceTest`)**: Verifies the orchestrator logic, input validation, and proper integration with ports. It is isolated from the database and web layer using **Mockito** to mock the repository port.
+| Test Case | Method | Date / Time | Product ID | Brand ID | Expected Price List | Target Price | Expected HTTP Status / Outcome |
+|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---|
+| **Test 1** | `test1_RequestAt10AMOn14th_ShouldReturnPrice35_50` | June 14, 2020 10:00 | 35455 | 1 | **1** | **35.50 EUR** | `200 OK` (Base default price) |
+| **Test 2** | `test2_RequestAt4PMOn14th_ShouldReturnPrice25_45` | June 14, 2020 16:00 | 35455 | 1 | **2** | **25.45 EUR** | `200 OK` (Overruled by higher priority 1) |
+| **Test 3** | `test3_RequestAt9PMOn14th_ShouldReturnPrice35_50` | June 14, 2020 21:00 | 35455 | 1 | **1** | **35.50 EUR** | `200 OK` (Timeframe expired; reverts to base) |
+| **Test 4** | `test4_RequestAt10AMOn15th_ShouldReturnPrice30_50` | June 15, 2020 10:00 | 35455 | 1 | **3** | **30.50 EUR** | `200 OK` (Active timeframe with Priority 1) |
+| **Test 5** | `test5_RequestAt7PMOn16th_ShouldReturnPrice38_95` | June 16, 2020 19:00 | 35455 | 1 | **4** | **38.95 EUR** | `200 OK` (Final promotion active with Priority 1) |
+| **Test 6** | `test6_RequestWhereNoPriceExists_ShouldReturn404` | Jan 01, 2021 00:00 | 35455 | 1 | - | - | `404 Not Found` (No active price match) |
+| **Test 7** | `test7_RequestWithMissingParameters_ShouldReturn400` | June 14, 2020 10:00 | 35455 | - | - | - | `400 Bad Request` (Missing required `brandId`) |
 
-To run the unit test suites:
+### 2. Spring MVC Web Slice Tests (`PriceControllerTest`)
+
+Uses `MockMvc` and Spring Boot test slicing (`@SpringBootTest` with `@AutoConfigureMockMvc`) to validate request mappings, query parameters, content types, and JSON responses.
+
+### 3. Unit Tests — Domain & Business Layer
+
+* **Domain Layer (`PricePrioritySelectorTest`)**: Validates the priority selection rule logic in total isolation without frameworks or mocks.
+* **Application Layer (`GetApplicablePriceServiceTest`)**: Verifies service orchestration, input guards, exception throwing (`PriceNotFoundException`, `IllegalArgumentException`), and port invocations using **Mockito**.
+
+### Executing Specific Test Suites
+
 ```bash
-# Run all tests
-./mvnw test
+# Run REST-Assured integration tests
+./mvnw test -Dtest=PriceControllerRestIntegrationTest
 
-# Run a specific unit test class
-./mvnw test -Dtest=PricePrioritySelectorTest
+# Run MockMvc web slice tests
+./mvnw test -Dtest=PriceControllerTest
+
+# Run Service layer unit tests
 ./mvnw test -Dtest=GetApplicablePriceServiceTest
+
+# Run Domain priority selector unit tests
+./mvnw test -Dtest=PricePrioritySelectorTest
 ```
-
-### Test coverage breakdown
-
-#### ✅ Happy Path
-
-| Test | Description |
-|:---|:---|
-| `testGetApplicablePriceSuccess` | Returns the correct `Price` when the repository finds a match, and verifies the repository is called exactly once. |
-| `testGetApplicablePriceReturnsAllFields` | Asserts that all domain fields (`brandId`, `productId`, `priceList`, `priority`, `price`, `curr`, `startDate`, `endDate`) are propagated from the repository result without any silent data loss. |
-
-#### ❌ Price Not Found
-
-| Test | Description |
-|:---|:---|
-| `testGetApplicablePriceNotFound` | Verifies that `PriceNotFoundException` is thrown when the repository returns an empty `Optional`. |
-| `testGetApplicablePriceNotFoundExceptionMessage` | Asserts the exact exception message format: `"Price not found for product {id}, brand {id} at date {date}"`. |
-
-#### 🚫 Input Validation — Null Fields (message assertion)
-
-| Test | Description |
-|:---|:---|
-| `testGetApplicablePriceWithNullProductId` | Throws `IllegalArgumentException` with message `"Product ID and Brand ID must not be null"` when `productId` is `null`. |
-| `testGetApplicablePriceWithNullBrandId` | Same exception and message when `brandId` is `null`. |
-| `testGetApplicablePriceWithNullApplicationDate` | Throws `IllegalArgumentException` with message `"Application date must not be null"` when `applicationDate` is `null`. |
-
-#### 🚫 Input Validation — Repository not invoked on null inputs
-
-| Test | Description |
-|:---|:---|
-| `testGetApplicablePriceNullProductIdDoesNotInvokeRepository` | Guarantees the repository is **never called** when `productId` is `null` (fail-fast guard). |
-| `testGetApplicablePriceNullBrandIdDoesNotInvokeRepository` | Same guarantee for `brandId` null. |
-| `testGetApplicablePriceNullDateDoesNotInvokeRepository` | Same guarantee for `applicationDate` null. |
-
-#### 🔀 Request Variations (toBuilder copy)
-
-| Test | Description |
-|:---|:---|
-| `testGetApplicablePriceWithDifferentProduct` | A request with a different `productId` is correctly forwarded to the repository; `PriceNotFoundException` is thrown when no match is found. |
-| `testGetApplicablePriceWithDifferentBrand` | Same flow with a different `brandId`. |
-| `testGetApplicablePriceWithDifferentDate` | Same flow with a different `applicationDate`. |
