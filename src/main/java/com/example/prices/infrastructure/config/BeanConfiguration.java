@@ -20,6 +20,7 @@ public class BeanConfiguration {
     public GetApplicablePriceUseCase getApplicablePriceUseCase(
             PriceRepositoryPort priceRepositoryPort,
             PricePrioritySelector pricePrioritySelector) {
-        return new GetApplicablePriceService(priceRepositoryPort, pricePrioritySelector);
+        return new GetApplicablePriceService(priceRepositoryPort,
+                pricePrioritySelector);
     }
 }

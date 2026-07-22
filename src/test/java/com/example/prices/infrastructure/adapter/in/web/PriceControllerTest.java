@@ -49,7 +49,7 @@ class PriceControllerTest {
                 .andExpect(jsonPath("$.brandId", is(Integer.valueOf(1))))
                 .andExpect(jsonPath("$.priceList", is(Integer.valueOf(1))))
                 .andExpect(jsonPath("$.price", is(Double.valueOf(35.50))))
-                .andExpect(jsonPath("$.curr", is(EUR)));
+                .andExpect(jsonPath("$.currency", is(EUR)));
         // @formatter:on
     }
 
@@ -74,7 +74,7 @@ class PriceControllerTest {
                 .andExpect(jsonPath("$.brandId", is(Integer.valueOf(1))))
                 .andExpect(jsonPath("$.priceList", is(Integer.valueOf(2))))
                 .andExpect(jsonPath("$.price", is(Double.valueOf(25.45))))
-                .andExpect(jsonPath("$.curr", is(EUR)));
+                .andExpect(jsonPath("$.currency", is(EUR)));
         // @formatter:on
     }
 
@@ -99,7 +99,7 @@ class PriceControllerTest {
                 .andExpect(jsonPath("$.brandId", is(Integer.valueOf(1))))
                 .andExpect(jsonPath("$.priceList", is(Integer.valueOf(1))))
                 .andExpect(jsonPath("$.price", is(Double.valueOf(35.50))))
-                .andExpect(jsonPath("$.curr", is(EUR)));
+                .andExpect(jsonPath("$.currency", is(EUR)));
         // @formatter:on
     }
 
@@ -124,7 +124,7 @@ class PriceControllerTest {
                 .andExpect(jsonPath("$.brandId", is(Integer.valueOf(1))))
                 .andExpect(jsonPath("$.priceList", is(Integer.valueOf(3))))
                 .andExpect(jsonPath("$.price", is(Double.valueOf(30.50))))
-                .andExpect(jsonPath("$.curr", is(EUR)));
+                .andExpect(jsonPath("$.currency", is(EUR)));
         // @formatter:on
     }
 
@@ -149,7 +149,7 @@ class PriceControllerTest {
                 .andExpect(jsonPath("$.brandId", is(Integer.valueOf(1))))
                 .andExpect(jsonPath("$.priceList", is(Integer.valueOf(4))))
                 .andExpect(jsonPath("$.price", is(Double.valueOf(38.95))))
-                .andExpect(jsonPath("$.curr", is(EUR)));
+                .andExpect(jsonPath("$.currency", is(EUR)));
         // @formatter:on
     }
 

@@ -1,7 +1,7 @@
 package com.example.prices.infrastructure.adapter.in.web.exception;
 
 import com.example.prices.domain.exception.PriceNotFoundException;
-import com.example.prices.infrastructure.adapter.in.web.dto.ErrorResponseDTO;
+import com.example.prices.infrastructure.adapter.in.web.dto.ErrorResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -16,79 +16,59 @@ import java.time.LocalDateTime;
 public class GlobalExceptionHandler {
 
     @ExceptionHandler(PriceNotFoundException.class)
-    public ResponseEntity<ErrorResponseDTO> handlePriceNotFound(
+    public ResponseEntity<ErrorResponse> handlePriceNotFound(
             PriceNotFoundException ex, HttpServletRequest request) {
-        // @formatter:off
-        ErrorResponseDTO error = ErrorResponseDTO.builder()
-                .timestamp(LocalDateTime.now())
-                .status(HttpStatus.NOT_FOUND.value())
-                .error(HttpStatus.NOT_FOUND.getReasonPhrase())
-                .message(ex.getMessage())
-                .path(request.getRequestURI())
-                .build();
-        // @formatter:on
+        ErrorResponse error = new ErrorResponse(LocalDateTime.now(),
+                Integer.valueOf(HttpStatus.NOT_FOUND.value()),
+                HttpStatus.NOT_FOUND.getReasonPhrase(), ex.getMessage(),
+                request.getRequestURI());
         return new ResponseEntity<>(error, HttpStatus.NOT_FOUND);
     }
 
     @ExceptionHandler(MissingServletRequestParameterException.class)
-    public ResponseEntity<ErrorResponseDTO> handleMissingParameter(
+    public ResponseEntity<ErrorResponse> handleMissingParameter(
             MissingServletRequestParameterException ex,
             HttpServletRequest request) {
-        // @formatter:off
-        ErrorResponseDTO error = ErrorResponseDTO.builder()
-                .timestamp(LocalDateTime.now())
-                .status(HttpStatus.BAD_REQUEST.value())
-                .error(HttpStatus.BAD_REQUEST.getReasonPhrase())
-                .message(ex.getMessage())
-                .path(request.getRequestURI())
-                .build();
-        // @formatter:on
+        ErrorResponse error = new ErrorResponse(LocalDateTime.now(),
+                Integer.valueOf(HttpStatus.BAD_REQUEST.value()),
+                HttpStatus.BAD_REQUEST.getReasonPhrase(), ex.getMessage(),
+                request.getRequestURI());
         return new ResponseEntity<>(error, HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(MethodArgumentTypeMismatchException.class)
-    public ResponseEntity<ErrorResponseDTO> handleTypeMismatch(
+    public ResponseEntity<ErrorResponse> handleTypeMismatch(
             MethodArgumentTypeMismatchException ex,
             HttpServletRequest request) {
-        // @formatter:off
-        ErrorResponseDTO error = ErrorResponseDTO.builder()
-                .timestamp(LocalDateTime.now())
-                .status(HttpStatus.BAD_REQUEST.value())
-                .error(HttpStatus.BAD_REQUEST.getReasonPhrase())
-                .message(String.format("Parameter '%s' should be of type %s", ex.getName(), ex.getRequiredType() != null ? ex.getRequiredType().getSimpleName() : "required type"))
-                .path(request.getRequestURI())
-                .build();
-        // @formatter:on
+        ErrorResponse error = new ErrorResponse(LocalDateTime.now(),
+                Integer.valueOf(HttpStatus.BAD_REQUEST.value()),
+                HttpStatus.BAD_REQUEST.getReasonPhrase(),
+                String.format("Parameter '%s' should be of type %s",
+                        ex.getName(),
+                        ex.getRequiredType() != null
+                                ? ex.getRequiredType().getSimpleName()
+                                : "required type"),
+                request.getRequestURI());
         return new ResponseEntity<>(error, HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(IllegalArgumentException.class)
-    public ResponseEntity<ErrorResponseDTO> handleIllegalArgument(
+    public ResponseEntity<ErrorResponse> handleIllegalArgument(
             IllegalArgumentException ex, HttpServletRequest request) {
-        // @formatter:off
-        ErrorResponseDTO error = ErrorResponseDTO.builder()
-                .timestamp(LocalDateTime.now())
-                .status(HttpStatus.BAD_REQUEST.value())
-                .error(HttpStatus.BAD_REQUEST.getReasonPhrase())
-                .message(ex.getMessage())
-                .path(request.getRequestURI())
-                .build();
-        // @formatter:on
+        ErrorResponse error = new ErrorResponse(LocalDateTime.now(),
+                Integer.valueOf(HttpStatus.BAD_REQUEST.value()),
+                HttpStatus.BAD_REQUEST.getReasonPhrase(), ex.getMessage(),
+                request.getRequestURI());
         return new ResponseEntity<>(error, HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<ErrorResponseDTO> handleGeneral(Exception ex,
+    public ResponseEntity<ErrorResponse> handleGeneral(Exception ex,
             HttpServletRequest request) {
-        // @formatter:off
-        ErrorResponseDTO error = ErrorResponseDTO.builder()
-                .timestamp(LocalDateTime.now())
-                .status(HttpStatus.INTERNAL_SERVER_ERROR.value())
-                .error(HttpStatus.INTERNAL_SERVER_ERROR.getReasonPhrase())
-                .message(ex.getMessage())
-                .path(request.getRequestURI())
-                .build();
-        // @formatter:on
+        ErrorResponse error = new ErrorResponse(LocalDateTime.now(),
+                Integer.valueOf(HttpStatus.INTERNAL_SERVER_ERROR.value()),
+                HttpStatus.INTERNAL_SERVER_ERROR.getReasonPhrase(),
+                ex.getMessage(), request.getRequestURI());
         return new ResponseEntity<>(error, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 }
