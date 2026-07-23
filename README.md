@@ -51,7 +51,6 @@ This project relies on the following core dependencies configured in `pom.xml`:
 
 ### Prerequisites
 * Java 21 or higher
-* Maven 3.8+
 
 ### Build and Run locally
 To compile the package, execute tests, and start the local runtime server:
