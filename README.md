@@ -156,3 +156,17 @@ Uses `MockMvc` and Spring Boot test slicing (`@SpringBootTest` with `@AutoConfig
 # Run Domain priority selector unit tests
 ./mvnw test -Dtest=PricePrioritySelectorTest
 ```
+
+### 4. Running Postman Collection Tests
+
+Postman collection containing the E2E test scenarios with automated assertion scripts is located at:
+
+```
+src/test/resources/postman/Altia backend test.postman_collection.json
+```
+**How to run**:
+
+1. Start the application (./mvnw spring-boot:run).
+2. Open Postman and click Import.
+3. Select src/test/resources/postman/Altia backend test.postman_collection.json.
+4. Run individual requests or execute the full suite using Postman Collection Runner against http://localhost:8080.
